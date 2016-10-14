@@ -278,31 +278,57 @@ class Cloud():
                                 package = self.recvJson(self.lastSocket)
                                 # self.log.debug('FROM:{}|TO:{}|REQUEST:{}'.format(package['from'], package['to'],
                                 #                                                  package['request']))
-                                hasMe = False
-                                for each in package['to']:
-                                    if each == self.node['hash']:
-                                        hasMe = True
-                                if hasMe: # 收件人有我
-                                    if package['request'] == 'acceptConnect':
-                                        self.lastNode = package['data']['hash']
-                                        self.cloud[self.lastNode] = package['data']
-                                        self.pingDict[self.lastNode] = ping
-                                        newPackage = self.makePackage([package['data']['hash']], 'getCloud')
-                                        self.sendJson(self.lastSocket, newPackage)
-                                    elif package['request'] == 'setCloud':
-                                        self.cloud = package['data']
-                                    elif package['request'] == 'setLast':
-                                        self.lastSocket.close()
-                                        self.lastSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                                        self.isRunning['Last'] = False
-                                        newEvent = {}
-                                        newEvent['request'] = 'connect'
-                                        newEvent['data'] = {}
-                                        newEvent['data']['ip'] = package['data']['ip']
-                                        newEvent['data']['port'] = package['data']['port']
-                                        self.last['event'].append(newEvent)
-                                else: # 收件人没有我
-                                    pass
+                                if package['to'][0] == 'everyone': # 广播
+                                    hasOne = False
+                                    for each in self.packageList:
+                                        if package['hash'] == each:
+                                            hasOne = True
+                                    if not hasOne:
+                                        self.packageList.append(package['hash'])
+                                        if package['request'] == 'nodeOnline':
+                                            print('!')
+                                        elif package['request'] == 'refreshCloud':
+                                            package['data'][self.node['hash']]= self.node
+                                        elif package['request'] == 'setCloud':
+                                            self.cloud = package['data']
+                                        self.sendNext(package)
+                                    else:
+                                        if package['request'] == 'refreshCloud':
+                                            package['data'][self.node['hash']] = self.node
+                                            self.cloud = package['data']
+                                            newPackage = self.makePackage(['everyone'], 'setCloud', self.cloud)
+                                            self.sendNews(newPackage)
+                                else:
+                                    hasMe = False
+                                    for each in package['to']:
+                                        if each == self.node['hash']:
+                                            hasMe = True
+                                    if hasMe: # 收件人有我
+                                        if package['request'] == 'acceptConnect':
+                                            self.node['lastNode'] = package['data']['hash']
+                                            self.cloud[self.node['lastNode']] = package['data']
+                                            self.pingDict[self.node['lastNode']] = ping
+                                            newPackage = self.makePackage([package['data']['hash']], 'getCloud')
+                                            self.sendJson(self.lastSocket, newPackage)
+                                            newPackage = self.makePackage(['everyone'], 'nodeOnline', self.node)
+                                            print(self.node)
+                                            self.sendNews(newPackage)
+                                        elif package['request'] == 'setCloud':
+                                            self.cloud = package['data']
+                                        elif package['request'] == 'setLast':
+                                            self.lastSocket.close()
+                                            self.lastSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                            self.isRunning['Last'] = False
+                                            newEvent = {}
+                                            newEvent['request'] = 'connect'
+                                            newEvent['data'] = {}
+                                            newEvent['data']['ip'] = package['data']['ip']
+                                            newEvent['data']['port'] = package['data']['port']
+                                            self.last['event'] = deque([]) # BUG(miswanting): 会多几个事件
+                                            self.last['event'].append(newEvent)
+                                    else: # 收件人没有我
+                                        # 从nextNode传走
+                                        self.sendNext(package)
                         except OSError as e:
                             print(e)
                             self.log.error('连接失败：{}'.format(e))
