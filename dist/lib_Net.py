@@ -447,12 +447,17 @@ class Cloud():
         except json.JSONDecodeError as e:
             print(e)
             self.log.error('JSON解包失败，修复中：{}'.format(e))
-            msg = msg.split('}{')
-            tmp1 = json.loads(msg[0] + '}')
-            tmp2 = json.loads('{' + msg[1])
-            self.log.debug('!RECV REQUEST:{}|FROM:{}|TO:{}'.format(tmp1['request'], tmp1['from'], tmp1['to']))
-            self.log.debug('!PASS REQUEST:{}|FROM:{}|TO:{}'.format(tmp2['request'], tmp2['from'], tmp2['to']))
-            return tmp1
+            self.log.error('JSON包信息：{}'.format(msg))
+            if not msg:
+                return msg
+            msg = msg.replace('}{', '}|{')
+            msg = msg.split('|')
+            tmp = json.loads(msg[0])
+            self.log.debug('!RECV REQUEST:{}|FROM:{}|TO:{}'.format(tmp['request'], tmp['from'], tmp['to']))
+            for i in range(0, len(msg) - 1):
+                tmp1 = json.loads(msg[i + 1])
+                self.log.debug('!PASS REQUEST:{}|FROM:{}|TO:{}'.format(tmp1['request'], tmp1['from'], tmp1['to']))
+            return tmp
     
     def recvMsg(self, connection):
         tmp = self.recv(connection).decode("utf-8")
