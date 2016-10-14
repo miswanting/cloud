@@ -114,6 +114,8 @@ class Cloud():
             self.log.debug('self.cloud: {}'.format(self.cloud))
             self.log.debug('self.pingDict: {}'.format(self.pingDict))
             self.log.debug('self.contrastDict: {}'.format(self.contrastDict))
+            self.log.debug('threads: {}'.format(threading.active_count()))
+            self.log.debug('threads: {}'.format(threading.enumerate()))
             self.log.debug('||-----------------------------')
         
         # startStar
