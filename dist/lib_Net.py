@@ -31,6 +31,9 @@ class Cloud():
         # 自己
         self.node = {}
         
+        # 生成自身Hash
+        self.node['hash'] = self.getHash()
+        
         # 云在我心中
         self.cloud = {}
         
@@ -283,7 +286,6 @@ class Cloud():
             while self.isRunning['LastMission']:
                 try:
                     # 获取lastStar消息
-                    print(len(self.last['event']))
                     event = self.last['event'].popleft()
                     if event['request'] == 'connect':
                         self.log.info('正在尝试连接：{}:{}'.format(event['data']['ip'], event['data']['port']))
