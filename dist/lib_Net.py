@@ -106,18 +106,38 @@ class Cloud():
     
     def startStar(self):
         def star():
+            def checkCircle():
+                # 检查线程 & 测试通信
+                if self.lastStar.is_alive():
+                    self.log.debug('last.is_alive')
+                    newPackage = self.makePackage(['you'], 'test')
+                    self.sendJson(self.lastSocket, newPackage)
+                else:
+                    self.log.debug('last.not_alive')
+                hash = self.contrastDict[self.node['nextNode']]
+                if self.subServerStarDict[hash]['thread'].is_alive():
+                    self.log.debug('next.is_alive')
+                    newPackage = self.makePackage(['you'], 'test')
+                    self.sendJson(self.subServerStarDict[hash]['connection'], newPackage)
+                else:
+                    self.log.debug('last.not_alive')
+            
+            def report():
+                self.log.debug('||-----------------------------')
+                self.log.debug('ReportFrom: {}'.format(self.node['hash']))
+                self.log.debug('self.isRunning: {}'.format(self.isRunning))
+                self.log.debug('self.node: {}'.format(self.node))
+                self.log.debug('self.cloud: {}'.format(self.cloud))
+                self.log.debug('self.pingDict: {}'.format(self.pingDict))
+                self.log.debug('self.contrastDict: {}'.format(self.contrastDict))
+                self.log.debug('threads: {}'.format(threading.active_count()))
+                self.log.debug('threads: {}'.format(threading.enumerate()))
+                self.log.debug('||-----------------------------')
+            
             time.sleep(5)
-            self.log.debug('||-----------------------------')
-            self.log.debug('ReportFrom: {}'.format(self.node['hash']))
-            self.log.debug('self.isRunning: {}'.format(self.isRunning))
-            self.log.debug('self.node: {}'.format(self.node))
-            self.log.debug('self.cloud: {}'.format(self.cloud))
-            self.log.debug('self.pingDict: {}'.format(self.pingDict))
-            self.log.debug('self.contrastDict: {}'.format(self.contrastDict))
-            self.log.debug('threads: {}'.format(threading.active_count()))
-            self.log.debug('threads: {}'.format(threading.enumerate()))
-            self.log.debug('||-----------------------------')
+            report()
             self.refreshCloud()
+            checkCircle()
         
         # startStar
         # 启动star线程
