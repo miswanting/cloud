@@ -210,7 +210,7 @@ class Cloud():
                             if not hasOne:
                                 self.packageList.append(package['hash'])
                                 if package['request'] == 'nodeOnline':
-                                    print('!')
+                                    pass
                                 elif package['request'] == 'refreshCloud':
                                     package['data'][self.node['hash']] = self.node
                                 elif package['request'] == 'setCloud':
@@ -316,9 +316,9 @@ class Cloud():
                                     if not hasOne:
                                         self.packageList.append(package['hash'])
                                         if package['request'] == 'nodeOnline':
-                                            print('!')
+                                            pass
                                         elif package['request'] == 'refreshCloud':
-                                            package['data'][self.node['hash']]= self.node
+                                            package['data'][self.node['hash']] = self.node
                                         elif package['request'] == 'setCloud':
                                             self.cloud = package['data']
                                         self.sendNext(package)
@@ -341,7 +341,6 @@ class Cloud():
                                             newPackage = self.makePackage([package['data']['hash']], 'getCloud')
                                             self.sendJson(self.lastSocket, newPackage)
                                             newPackage = self.makePackage(['everyone'], 'nodeOnline', self.node)
-                                            print(self.node)
                                             self.sendNews(newPackage)
                                         elif package['request'] == 'setCloud':
                                             self.cloud = package['data']
@@ -426,6 +425,7 @@ class Cloud():
     
     def recvMsg(self, connection):
         tmp = self.recv(connection).decode("utf-8")
+        # print(tmp)
         return tmp
     
     def recv(self, connection):
