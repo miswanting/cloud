@@ -220,7 +220,7 @@ class Cloud():
                                 if package['request'] == 'refreshCloud':
                                     package['data'][self.node['hash']] = self.node
                                     self.cloud = package['data']
-                                    newPackage = self.makePackage(['everyone'],'setCloud',self.cloud)
+                                    newPackage = self.makePackage(['everyone'], 'setCloud', self.cloud)
                                     self.sendNews(newPackage)
                         else:
                             hasMe = False
