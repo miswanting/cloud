@@ -431,6 +431,20 @@ class Cloud():
     def recv(self, connection):
         return connection.recv(8192)
     
+    def sendNews(self, package):
+        if not self.node['lastNode'] == '':
+            self.sendLast(package)
+        if not self.node['nextNode'] == '':
+            self.sendNext(package)
+            # if not self.node['randNode'] == '':
+            #     self.sendRand(package)
+    
+    def sendLast(self, package):
+        self.sendJson(self.lastSocket, package)
+    
+    def sendNext(self, package):
+        self.sendJson(self.subServerStarDict[self.contrastDict[self.node['nextNode']]]['connection'], package)
+    
     def sendJson(self, connection, data):
         tmp = data
         self.log.debug('SEND REQUEST:{}|FROM:{}|TO:{}'.format(data['request'], data['from'], data['to']))
