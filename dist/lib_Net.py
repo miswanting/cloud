@@ -419,9 +419,20 @@ class Cloud():
         self.sendNews(newPackage)
     
     def recvJson(self, connection):
-        tmp = json.loads(self.recvMsg(connection))
-        self.log.debug('RECV REQUEST:{}|FROM:{}|TO:{}'.format(tmp['request'], tmp['from'], tmp['to']))
-        return tmp
+        msg = self.recvMsg(connection)
+        try:
+            tmp = json.loads(msg)
+            self.log.debug('RECV REQUEST:{}|FROM:{}|TO:{}'.format(tmp['request'], tmp['from'], tmp['to']))
+            return tmp
+        except json.JSONDecodeError as e:
+            print(e)
+            self.log.error('JSON解包失败，修复中：{}'.format(e))
+            msg = msg.split('}{')
+            tmp1 = json.loads(msg[0] + '}')
+            tmp2 = json.loads('{' + msg[1])
+            self.log.debug('!RECV REQUEST:{}|FROM:{}|TO:{}'.format(tmp1['request'], tmp1['from'], tmp1['to']))
+            self.log.debug('!PASS REQUEST:{}|FROM:{}|TO:{}'.format(tmp2['request'], tmp2['from'], tmp2['to']))
+            return tmp1
     
     def recvMsg(self, connection):
         tmp = self.recv(connection).decode("utf-8")
