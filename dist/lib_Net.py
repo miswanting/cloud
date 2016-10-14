@@ -58,6 +58,20 @@ class Cloud():
         self.randSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
+        # 设置Logging模块
+        fmt = '{0:^8}'
+        logging.basicConfig(filename='Cloud.log', level=logging.DEBUG, filemode='w',
+                            format='%(relativeCreated)d[%(levelname).4s][%(threadName)-.10s]%(message)s',
+                            datefmt='%I:%M:%S')
+        self.log = logging.getLogger(self.node['hash'])
+        self.log.setLevel(logging.DEBUG)
+        handler = logging.FileHandler(self.node['hash'] + '.log', 'w')
+        handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(relativeCreated)d[%(levelname).4s][%(threadName)-.10s]%(message)s')
+        handler.setFormatter(formatter)
+        self.log.addHandler(handler)
+        self.log.info('Hash: {}'.format(self.node['hash']))
+        
         # 关键线程
         self.star = None
         self.lastStar = None
@@ -310,21 +324,6 @@ class Cloud():
         self.randStar.start()
     
     def generateMyNode(self):
-        # 生成自身Hash
-        self.node['hash'] = self.getHash()
-        # 设置Logging模块
-        fmt = '{0:^8}'
-        logging.basicConfig(filename='Cloud.log', level=logging.DEBUG, filemode='w',
-                            format='%(relativeCreated)d[%(levelname).4s][%(threadName)-.10s]%(message)s',
-                            datefmt='%I:%M:%S')
-        self.log = logging.getLogger(self.node['hash'])
-        self.log.setLevel(logging.DEBUG)
-        handler = logging.FileHandler(self.node['hash'] + '.log', 'w')
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(relativeCreated)d[%(levelname).4s][%(threadName)-.10s]%(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-        self.log.info('Hash: {}'.format(self.node['hash']))
         # 设置Debug模式
         self.debug = True
         self.log.debug('Debug: {}'.format(self.debug))
