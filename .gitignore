@@ -10,4 +10,4 @@ gen
 dist/__pycache__/
 *.log
 *.xml
-.idea/vcs.xml
+.idea/
