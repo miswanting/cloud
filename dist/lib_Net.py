@@ -391,6 +391,8 @@ class Cloud():
                                         if each == self.node['hash']:
                                             hasMe = True
                                     if hasMe: # 收件人有我
+                                        print(package)
+                                        self.sendNext(package)
                                     else: # 收件人没有我
                                         # 从nextNode传走
                                         self.sendNext(package)
