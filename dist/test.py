@@ -34,7 +34,7 @@ class Test():
         tA = threading.Thread(name='ThreadA', target=runA)
         tB = threading.Thread(name='ThreadB', target=runB)
         tC = threading.Thread(name='ThreadC', target=runC)
-        tD = threading.Thread(name='ThreadC', target=runD)
+        tD = threading.Thread(name='ThreadD', target=runD)
         tA.start()
         time.sleep(1)
         tB.start()
@@ -42,6 +42,10 @@ class Test():
         tC.start()
         time.sleep(1)
         tD.start()
+        tA.join()
+        tB.join()
+        tC.join()
+        tD.join()
 
 
 if __name__ == '__main__':
