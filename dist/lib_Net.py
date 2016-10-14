@@ -155,7 +155,9 @@ class Cloud():
                         package = self.recvJson(subServer['connection'])
                         # self.log.debug(
                         #     'FROM:{}|TO:{}|REQUEST:{}'.format(package['from'], package['to'], package['request']))
-                        if package['to'][0] == 'you': # 收件人是我
+                        if not package:
+                            pass
+                        elif package['to'][0] == 'you': # 收件人是我
                             if package['request'] == 'connect': # 收到connect请求
                                 # 安全检查
                                 # 插入环
@@ -328,7 +330,9 @@ class Cloud():
                                 package = self.recvJson(self.lastSocket)
                                 # self.log.debug('FROM:{}|TO:{}|REQUEST:{}'.format(package['from'], package['to'],
                                 #                                                  package['request']))
-                                if package['to'][0] == 'everyone': # 广播
+                                if not package:
+                                    pass
+                                elif package['to'][0] == 'everyone': # 广播
                                     hasOne = False
                                     for each in self.packageList:
                                         if package['hash'] == each:
