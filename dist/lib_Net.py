@@ -117,6 +117,7 @@ class Cloud():
             self.log.debug('threads: {}'.format(threading.active_count()))
             self.log.debug('threads: {}'.format(threading.enumerate()))
             self.log.debug('||-----------------------------')
+            self.refreshCloud()
         
         # startStar
         # 启动star线程
@@ -412,6 +413,11 @@ class Cloud():
         newEvent['data']['ip'] = ip
         newEvent['data']['port'] = port
         self.last['event'].append(newEvent)
+    
+    def refreshCloud(self):
+        self.cloud[self.node['hash']] = self.node
+        newPackage = self.makePackage(['everyone'], 'refreshCloud', self.cloud)
+        self.sendNews(newPackage)
     
     def recvJson(self, connection):
         tmp = json.loads(self.recvMsg(connection))
