@@ -183,7 +183,7 @@ class Cloud():
                                     newNode['port'] = self.node['port']
                                     newNode['nextNode'] = self.node['nextNode']
                                     newNode['lastNode'] = self.node['lastNode']
-                                    newPackage = self.makePackage([package['from']], 'acceptConnect', newNode)
+                                    newPackage = self.makePackage(['you'], 'acceptConnect', newNode)
                                     self.sendJson(subServer['connection'], newPackage)
                                     # 连接新加入的节点
                                     newEvent = {}
@@ -199,7 +199,7 @@ class Cloud():
                                     newNode['ip'] = package['data']['ip']
                                     newNode['port'] = package['data']['port']
                                     newNode['lastNode'] = self.node['hash']
-                                    newPackage = self.makePackage([self.node['nextNode']], 'setLast', newNode)
+                                    newPackage = self.makePackage(['you'], 'setLast', newNode)
                                     hash = self.contrastDict[self.node['nextNode']]
                                     self.sendJson(self.subServerStarDict[hash]['connection'], newPackage)
                                     self.isRunning[hash] = False
@@ -218,11 +218,19 @@ class Cloud():
                                     newNode['port'] = self.node['port']
                                     newNode['nextNode'] = self.node['nextNode']
                                     newNode['lastNode'] = self.node['lastNode']
-                                    newPackage = self.makePackage([package['from']], 'acceptConnect', newNode)
+                                    newPackage = self.makePackage(['you'], 'acceptConnect', newNode)
                                     self.sendJson(subServer['connection'], newPackage)
                                 # 全局广播
                                 pass
                             elif package['request'] == 'disconnect': # 收到disconnect请求
+                                pass
+                            elif package['request'] == 'getCloud':
+                                newPackage = self.makePackage(['you'], 'setCloud', self.cloud)
+                                self.sendJson(subServer['connection'], newPackage)
+                            elif package['request'] == 'test':
+                                newPackage = self.makePackage(['you'], 'acceptTest')
+                                self.sendJson(subServer['connection'], newPackage)
+                            elif package['request'] == 'acceptTest':
                                 pass
                         elif package['to'][0] == 'everyone': # 广播
                             hasOne = False
@@ -250,9 +258,7 @@ class Cloud():
                                 if each == self.node['hash']:
                                     hasMe = True
                             if hasMe: # 收件人有我
-                                if package['request'] == 'getCloud':
-                                    newPackage = self.makePackage([package['from']], 'setCloud', self.cloud)
-                                    self.sendJson(subServer['connection'], newPackage)
+                                self.sendLast(package)
                             else: # 收件人没有我
                                 # 从lastNode传走
                                 self.sendLast(package)
@@ -352,33 +358,39 @@ class Cloud():
                                             self.cloud = package['data']
                                             newPackage = self.makePackage(['everyone'], 'setCloud', self.cloud)
                                             self.sendNews(newPackage)
+                                elif package['to'][0] == 'you':
+                                    if package['request'] == 'acceptConnect':
+                                        self.node['lastNode'] = package['data']['hash']
+                                        self.cloud[self.node['lastNode']] = package['data']
+                                        self.pingDict[self.node['lastNode']] = ping
+                                        newPackage = self.makePackage(['you'], 'getCloud')
+                                        self.sendJson(self.lastSocket, newPackage)
+                                        newPackage = self.makePackage(['everyone'], 'nodeOnline', self.node)
+                                        self.sendNews(newPackage)
+                                    elif package['request'] == 'setCloud':
+                                        self.cloud = package['data']
+                                    elif package['request'] == 'setLast':
+                                        self.lastSocket.close()
+                                        self.lastSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                        self.isRunning['Last'] = False
+                                        newEvent = {}
+                                        newEvent['request'] = 'connect'
+                                        newEvent['data'] = {}
+                                        newEvent['data']['ip'] = package['data']['ip']
+                                        newEvent['data']['port'] = package['data']['port']
+                                        self.last['event'] = deque([]) # BUG(miswanting): 会多几个事件
+                                        self.last['event'].append(newEvent)
+                                    elif package['request'] == 'test':
+                                        newPackage = self.makePackage(['you'], 'acceptTest')
+                                        self.sendJson(self.lastSocket, newPackage)
+                                    elif package['request'] == 'acceptTest':
+                                        pass
                                 else:
                                     hasMe = False
                                     for each in package['to']:
                                         if each == self.node['hash']:
                                             hasMe = True
                                     if hasMe: # 收件人有我
-                                        if package['request'] == 'acceptConnect':
-                                            self.node['lastNode'] = package['data']['hash']
-                                            self.cloud[self.node['lastNode']] = package['data']
-                                            self.pingDict[self.node['lastNode']] = ping
-                                            newPackage = self.makePackage([package['data']['hash']], 'getCloud')
-                                            self.sendJson(self.lastSocket, newPackage)
-                                            newPackage = self.makePackage(['everyone'], 'nodeOnline', self.node)
-                                            self.sendNews(newPackage)
-                                        elif package['request'] == 'setCloud':
-                                            self.cloud = package['data']
-                                        elif package['request'] == 'setLast':
-                                            self.lastSocket.close()
-                                            self.lastSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                                            self.isRunning['Last'] = False
-                                            newEvent = {}
-                                            newEvent['request'] = 'connect'
-                                            newEvent['data'] = {}
-                                            newEvent['data']['ip'] = package['data']['ip']
-                                            newEvent['data']['port'] = package['data']['port']
-                                            self.last['event'] = deque([]) # BUG(miswanting): 会多几个事件
-                                            self.last['event'].append(newEvent)
                                     else: # 收件人没有我
                                         # 从nextNode传走
                                         self.sendNext(package)
