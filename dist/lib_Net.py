@@ -427,14 +427,10 @@ class Cloud():
         self.cloud[self.node['hash']] = self.node
     
     def start(self, port):
-        def Star():
-            pass
         
         def inputStar():
             pass
         
-        self.star = threading.Thread(name='Star', target=Star)
-        self.star.start()
         if self.debug:
             self.inputStar = threading.Thread(name='inputStar', target=inputStar)
             self.inputStar.start()
