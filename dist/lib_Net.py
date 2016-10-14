@@ -94,6 +94,9 @@ class Cloud():
         # 动态链接对照表
         self.contrastDict = {}
         
+        # 包阅读列表
+        self.packageList = deque([])
+        
         # 连接到云
         
         # 自定义过程
@@ -192,6 +195,26 @@ class Cloud():
                                 pass
                             elif package['request'] == 'disconnect': # 收到disconnect请求
                                 pass
+                        elif package['to'][0] == 'everyone': # 广播
+                            hasOne = False
+                            for each in self.packageList:
+                                if package['hash'] == each:
+                                    hasOne = True
+                            if not hasOne:
+                                self.packageList.append(package['hash'])
+                                if package['request'] == 'nodeOnline':
+                                    print('!')
+                                elif package['request'] == 'refreshCloud':
+                                    package['data'][self.node['hash']] = self.node
+                                elif package['request'] == 'setCloud':
+                                    self.cloud = package['data']
+                                self.sendLast(package)
+                            else:
+                                if package['request'] == 'refreshCloud':
+                                    package['data'][self.node['hash']] = self.node
+                                    self.cloud = package['data']
+                                    newPackage = self.makePackage(['everyone'],'setCloud',self.cloud)
+                                    self.sendNews(newPackage)
                         else:
                             hasMe = False
                             for each in package['to']:
@@ -202,7 +225,8 @@ class Cloud():
                                     newPackage = self.makePackage([package['from']], 'setCloud', self.cloud)
                                     self.sendJson(subServer['connection'], newPackage)
                             else: # 收件人没有我
-                                pass
+                                # 从lastNode传走
+                                self.sendLast(package)
                     except OSError as e:
                         print(e)
                         self.log.error('接受连接失败：{}'.format(e))
@@ -409,6 +433,7 @@ class Cloud():
     
     def makePackage(self, to, request, data=None):
         newPackage = {}
+        newPackage['hash'] = self.getHash()
         newPackage['from'] = self.node['hash']
         newPackage['to'] = to
         newPackage['request'] = request
