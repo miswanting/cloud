@@ -183,6 +183,7 @@ class Cloud():
                                     self.subServerStarDict[hash]['connection'].close()
                                     # 更新我的节点
                                     self.node['nextNode'] = package['data']['hash']
+                                    self.contrastDict[self.node['nextNode']] = threading.current_thread().getName()
                                     # 更新我的云节点
                                     self.cloud[self.node['hash']]['nextNode'] = package['data']['hash']
                                     # 新增对方的节点
