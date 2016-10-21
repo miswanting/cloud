@@ -152,116 +152,117 @@ class Cloud():
                 self.isRunning[threading.current_thread().getName()] = True
                 while self.isRunning[threading.current_thread().getName()]: # 持续响应请求
                     try:
-                        package = self.recvJson(subServer['connection'])
+                        packages = self.recvJson(subServer['connection'])
                         # self.log.debug(
                         #     'FROM:{}|TO:{}|REQUEST:{}'.format(package['from'], package['to'], package['request']))
-                        if not package:
-                            pass
-                        elif package['to'][0] == 'you': # 收件人是我
-                            if package['request'] == 'connect': # 收到connect请求
-                                # 安全检查
-                                # 插入环
-                                if self.node['nextNode'] == '': # 环状节点不存在
-                                    # 更新我的节点
-                                    self.node['nextNode'] = package['data']['hash']
-                                    self.contrastDict[self.node['nextNode']] = threading.current_thread().getName()
-                                    # 更新我的云节点
-                                    self.cloud[self.node['hash']]['nextNode'] = package['data']['hash']
-                                    self.cloud[self.node['hash']]['lastNode'] = package['data']['hash']
-                                    # 新增对方的节点
-                                    newNode = {}
-                                    newNode['hash'] = package['data']['hash']
-                                    newNode['ip'] = package['data']['ip']
-                                    newNode['port'] = package['data']['port']
-                                    newNode['nextNode'] = self.node['hash']
-                                    newNode['lastNode'] = self.node['hash']
-                                    self.cloud[package['data']['hash']] = newNode
-                                    # 返回自己的节点信息
-                                    newNode = {}
-                                    newNode['hash'] = self.node['hash']
-                                    newNode['ip'] = self.node['ip']
-                                    newNode['port'] = self.node['port']
-                                    newNode['nextNode'] = self.node['nextNode']
-                                    newNode['lastNode'] = self.node['lastNode']
-                                    newPackage = self.makePackage(['you'], 'acceptConnect', newNode)
-                                    self.sendJson(subServer['connection'], newPackage)
-                                    # 连接新加入的节点
-                                    newEvent = {}
-                                    newEvent['request'] = 'connect'
-                                    newEvent['data'] = {}
-                                    newEvent['data']['ip'] = self.cloud[package['data']['hash']]['ip']
-                                    newEvent['data']['port'] = self.cloud[package['data']['hash']]['port']
-                                    self.last['event'].append(newEvent)
-                                else: # 环状节点已存在
-                                    # 叫原next节点重新连接新节点
-                                    newNode = {}
-                                    newNode['hash'] = package['data']['hash']
-                                    newNode['ip'] = package['data']['ip']
-                                    newNode['port'] = package['data']['port']
-                                    newNode['lastNode'] = self.node['hash']
-                                    newPackage = self.makePackage(['you'], 'setLast', newNode)
-                                    hash = self.contrastDict[self.node['nextNode']]
-                                    self.sendJson(self.subServerStarDict[hash]['connection'], newPackage)
-                                    self.isRunning[hash] = False
-                                    self.subServerStarDict[hash]['connection'].close()
-                                    # 更新我的节点
-                                    self.node['nextNode'] = package['data']['hash']
-                                    self.contrastDict[self.node['nextNode']] = threading.current_thread().getName()
-                                    # 更新我的云节点
-                                    self.cloud[self.node['hash']]['nextNode'] = package['data']['hash']
-                                    # 新增对方的节点
-                                    self.cloud[package['data']['hash']] = newNode
-                                    # 返回自己的节点信息
-                                    newNode = {}
-                                    newNode['hash'] = self.node['hash']
-                                    newNode['ip'] = self.node['ip']
-                                    newNode['port'] = self.node['port']
-                                    newNode['nextNode'] = self.node['nextNode']
-                                    newNode['lastNode'] = self.node['lastNode']
-                                    newPackage = self.makePackage(['you'], 'acceptConnect', newNode)
-                                    self.sendJson(subServer['connection'], newPackage)
-                                # 全局广播
+                        for package in packages:
+                            if not package:
                                 pass
-                            elif package['request'] == 'disconnect': # 收到disconnect请求
-                                pass
-                            elif package['request'] == 'getCloud':
-                                newPackage = self.makePackage(['you'], 'setCloud', self.cloud)
-                                self.sendJson(subServer['connection'], newPackage)
-                            elif package['request'] == 'test':
-                                newPackage = self.makePackage(['you'], 'acceptTest')
-                                self.sendJson(subServer['connection'], newPackage)
-                            elif package['request'] == 'acceptTest':
-                                pass
-                        elif package['to'][0] == 'everyone': # 广播
-                            hasOne = False
-                            for each in self.packageList:
-                                if package['hash'] == each:
-                                    hasOne = True
-                            if not hasOne:
-                                self.packageList.append(package['hash'])
-                                if package['request'] == 'nodeOnline':
+                            elif package['to'][0] == 'you': # 收件人是我
+                                if package['request'] == 'connect': # 收到connect请求
+                                    # 安全检查
+                                    # 插入环
+                                    if self.node['nextNode'] == '': # 环状节点不存在
+                                        # 更新我的节点
+                                        self.node['nextNode'] = package['data']['hash']
+                                        self.contrastDict[self.node['nextNode']] = threading.current_thread().getName()
+                                        # 更新我的云节点
+                                        self.cloud[self.node['hash']]['nextNode'] = package['data']['hash']
+                                        self.cloud[self.node['hash']]['lastNode'] = package['data']['hash']
+                                        # 新增对方的节点
+                                        newNode = {}
+                                        newNode['hash'] = package['data']['hash']
+                                        newNode['ip'] = package['data']['ip']
+                                        newNode['port'] = package['data']['port']
+                                        newNode['nextNode'] = self.node['hash']
+                                        newNode['lastNode'] = self.node['hash']
+                                        self.cloud[package['data']['hash']] = newNode
+                                        # 返回自己的节点信息
+                                        newNode = {}
+                                        newNode['hash'] = self.node['hash']
+                                        newNode['ip'] = self.node['ip']
+                                        newNode['port'] = self.node['port']
+                                        newNode['nextNode'] = self.node['nextNode']
+                                        newNode['lastNode'] = self.node['lastNode']
+                                        newPackage = self.makePackage(['you'], 'acceptConnect', newNode)
+                                        self.sendJson(subServer['connection'], newPackage)
+                                        # 连接新加入的节点
+                                        newEvent = {}
+                                        newEvent['request'] = 'connect'
+                                        newEvent['data'] = {}
+                                        newEvent['data']['ip'] = self.cloud[package['data']['hash']]['ip']
+                                        newEvent['data']['port'] = self.cloud[package['data']['hash']]['port']
+                                        self.last['event'].append(newEvent)
+                                    else: # 环状节点已存在
+                                        # 叫原next节点重新连接新节点
+                                        newNode = {}
+                                        newNode['hash'] = package['data']['hash']
+                                        newNode['ip'] = package['data']['ip']
+                                        newNode['port'] = package['data']['port']
+                                        newNode['lastNode'] = self.node['hash']
+                                        newPackage = self.makePackage(['you'], 'setLast', newNode)
+                                        hash = self.contrastDict[self.node['nextNode']]
+                                        self.sendJson(self.subServerStarDict[hash]['connection'], newPackage)
+                                        self.isRunning[hash] = False
+                                        self.subServerStarDict[hash]['connection'].close()
+                                        # 更新我的节点
+                                        self.node['nextNode'] = package['data']['hash']
+                                        self.contrastDict[self.node['nextNode']] = threading.current_thread().getName()
+                                        # 更新我的云节点
+                                        self.cloud[self.node['hash']]['nextNode'] = package['data']['hash']
+                                        # 新增对方的节点
+                                        self.cloud[package['data']['hash']] = newNode
+                                        # 返回自己的节点信息
+                                        newNode = {}
+                                        newNode['hash'] = self.node['hash']
+                                        newNode['ip'] = self.node['ip']
+                                        newNode['port'] = self.node['port']
+                                        newNode['nextNode'] = self.node['nextNode']
+                                        newNode['lastNode'] = self.node['lastNode']
+                                        newPackage = self.makePackage(['you'], 'acceptConnect', newNode)
+                                        self.sendJson(subServer['connection'], newPackage)
+                                    # 全局广播
                                     pass
-                                elif package['request'] == 'refreshCloud':
-                                    package['data'][self.node['hash']] = self.node
-                                elif package['request'] == 'setCloud':
-                                    self.cloud = package['data']
-                                self.sendLast(package)
+                                elif package['request'] == 'disconnect': # 收到disconnect请求
+                                    pass
+                                elif package['request'] == 'getCloud':
+                                    newPackage = self.makePackage(['you'], 'setCloud', self.cloud)
+                                    self.sendJson(subServer['connection'], newPackage)
+                                elif package['request'] == 'test':
+                                    newPackage = self.makePackage(['you'], 'acceptTest')
+                                    self.sendJson(subServer['connection'], newPackage)
+                                elif package['request'] == 'acceptTest':
+                                    pass
+                            elif package['to'][0] == 'everyone': # 广播
+                                hasOne = False
+                                for each in self.packageList:
+                                    if package['hash'] == each:
+                                        hasOne = True
+                                if not hasOne:
+                                    self.packageList.append(package['hash'])
+                                    if package['request'] == 'nodeOnline':
+                                        pass
+                                    elif package['request'] == 'refreshCloud':
+                                        package['data'][self.node['hash']] = self.node
+                                    elif package['request'] == 'setCloud':
+                                        self.cloud = package['data']
+                                    self.sendLast(package)
+                                else:
+                                    if package['request'] == 'refreshCloud':
+                                        package['data'][self.node['hash']] = self.node
+                                        self.cloud = package['data']
+                                        newPackage = self.makePackage(['everyone'], 'setCloud', self.cloud)
+                                        self.sendNews(newPackage)
                             else:
-                                if package['request'] == 'refreshCloud':
-                                    package['data'][self.node['hash']] = self.node
-                                    self.cloud = package['data']
-                                    newPackage = self.makePackage(['everyone'], 'setCloud', self.cloud)
-                                    self.sendNews(newPackage)
-                        else:
-                            hasMe = False
-                            for each in package['to']:
-                                if each == self.node['hash']:
-                                    hasMe = True
-                            if hasMe: # 收件人有我
-                                self.sendLast(package)
-                            else: # 收件人没有我
-                                # 从lastNode传走
-                                self.sendLast(package)
+                                hasMe = False
+                                for each in package['to']:
+                                    if each == self.node['hash']:
+                                        hasMe = True
+                                if hasMe: # 收件人有我
+                                    self.sendLast(package)
+                                else: # 收件人没有我
+                                    # 从lastNode传走
+                                    self.sendLast(package)
                     except OSError as e:
                         print(e)
                         self.log.error('接受连接失败：{}'.format(e))
@@ -299,7 +300,6 @@ class Cloud():
                                 self.subServerStarDict[hash] = newSubServerStar
                                 newSubServerStar['thread'].start()
                             except OSError as e: # 服务器侦听时强制关闭
-                                print(e)
                                 self.log.error('接受连接失败：{}'.format(e))
                                 self.isRunning['Server'] = False
                             finally:
@@ -333,71 +333,71 @@ class Cloud():
                             self.sendJson(self.lastSocket, newPackage)
                             self.isRunning['Last'] = True
                             while self.isRunning['Last']: # 持续响应请求
-                                package = self.recvJson(self.lastSocket)
+                                packages = self.recvJson(self.lastSocket)
                                 # self.log.debug('FROM:{}|TO:{}|REQUEST:{}'.format(package['from'], package['to'],
                                 #                                                  package['request']))
-                                if not package:
-                                    pass
-                                elif package['to'][0] == 'everyone': # 广播
-                                    hasOne = False
-                                    for each in self.packageList:
-                                        if package['hash'] == each:
-                                            hasOne = True
-                                    if not hasOne:
-                                        self.packageList.append(package['hash'])
-                                        if package['request'] == 'nodeOnline':
-                                            pass
-                                        elif package['request'] == 'refreshCloud':
-                                            package['data'][self.node['hash']] = self.node
+                                for package in packages:
+                                    if not package:
+                                        pass
+                                    elif package['to'][0] == 'everyone': # 广播
+                                        hasOne = False
+                                        for each in self.packageList:
+                                            if package['hash'] == each:
+                                                hasOne = True
+                                        if not hasOne:
+                                            self.packageList.append(package['hash'])
+                                            if package['request'] == 'nodeOnline':
+                                                pass
+                                            elif package['request'] == 'refreshCloud':
+                                                package['data'][self.node['hash']] = self.node
+                                            elif package['request'] == 'setCloud':
+                                                self.cloud = package['data']
+                                            self.sendNext(package)
+                                        else:
+                                            if package['request'] == 'refreshCloud':
+                                                package['data'][self.node['hash']] = self.node
+                                                self.cloud = package['data']
+                                                newPackage = self.makePackage(['everyone'], 'setCloud', self.cloud)
+                                                self.sendNews(newPackage)
+                                    elif package['to'][0] == 'you':
+                                        if package['request'] == 'acceptConnect':
+                                            self.node['lastNode'] = package['data']['hash']
+                                            self.cloud[self.node['lastNode']] = package['data']
+                                            self.pingDict[self.node['lastNode']] = ping
+                                            newPackage = self.makePackage(['you'], 'getCloud')
+                                            self.sendJson(self.lastSocket, newPackage)
+                                            newPackage = self.makePackage(['everyone'], 'nodeOnline', self.node)
+                                            self.sendNews(newPackage)
                                         elif package['request'] == 'setCloud':
                                             self.cloud = package['data']
-                                        self.sendNext(package)
+                                        elif package['request'] == 'setLast':
+                                            self.lastSocket.close()
+                                            self.lastSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                            self.isRunning['Last'] = False
+                                            newEvent = {}
+                                            newEvent['request'] = 'connect'
+                                            newEvent['data'] = {}
+                                            newEvent['data']['ip'] = package['data']['ip']
+                                            newEvent['data']['port'] = package['data']['port']
+                                            self.last['event'] = deque([]) # BUG(miswanting): 会多几个事件
+                                            self.last['event'].append(newEvent)
+                                        elif package['request'] == 'test':
+                                            newPackage = self.makePackage(['you'], 'acceptTest')
+                                            self.sendJson(self.lastSocket, newPackage)
+                                        elif package['request'] == 'acceptTest':
+                                            pass
                                     else:
-                                        if package['request'] == 'refreshCloud':
-                                            package['data'][self.node['hash']] = self.node
-                                            self.cloud = package['data']
-                                            newPackage = self.makePackage(['everyone'], 'setCloud', self.cloud)
-                                            self.sendNews(newPackage)
-                                elif package['to'][0] == 'you':
-                                    if package['request'] == 'acceptConnect':
-                                        self.node['lastNode'] = package['data']['hash']
-                                        self.cloud[self.node['lastNode']] = package['data']
-                                        self.pingDict[self.node['lastNode']] = ping
-                                        newPackage = self.makePackage(['you'], 'getCloud')
-                                        self.sendJson(self.lastSocket, newPackage)
-                                        newPackage = self.makePackage(['everyone'], 'nodeOnline', self.node)
-                                        self.sendNews(newPackage)
-                                    elif package['request'] == 'setCloud':
-                                        self.cloud = package['data']
-                                    elif package['request'] == 'setLast':
-                                        self.lastSocket.close()
-                                        self.lastSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                                        self.isRunning['Last'] = False
-                                        newEvent = {}
-                                        newEvent['request'] = 'connect'
-                                        newEvent['data'] = {}
-                                        newEvent['data']['ip'] = package['data']['ip']
-                                        newEvent['data']['port'] = package['data']['port']
-                                        self.last['event'] = deque([]) # BUG(miswanting): 会多几个事件
-                                        self.last['event'].append(newEvent)
-                                    elif package['request'] == 'test':
-                                        newPackage = self.makePackage(['you'], 'acceptTest')
-                                        self.sendJson(self.lastSocket, newPackage)
-                                    elif package['request'] == 'acceptTest':
-                                        pass
-                                else:
-                                    hasMe = False
-                                    for each in package['to']:
-                                        if each == self.node['hash']:
-                                            hasMe = True
-                                    if hasMe: # 收件人有我
-                                        print(package)
-                                        self.sendNext(package)
-                                    else: # 收件人没有我
-                                        # 从nextNode传走
-                                        self.sendNext(package)
+                                        hasMe = False
+                                        for each in package['to']:
+                                            if each == self.node['hash']:
+                                                hasMe = True
+                                        if hasMe: # 收件人有我
+                                            print(package)
+                                            self.sendNext(package)
+                                        else: # 收件人没有我
+                                            # 从nextNode传走
+                                            self.sendNext(package)
                         except OSError as e:
-                            print(e)
                             self.log.error('连接失败：{}'.format(e))
                             if e.winerror == 10057:
                                 print('对方强制关闭套接字')
@@ -457,20 +457,19 @@ class Cloud():
         try:
             tmp = json.loads(msg)
             self.log.debug('RECV REQUEST:{}|FROM:{}|TO:{}'.format(tmp['request'], tmp['from'], tmp['to']))
-            return tmp
+            return [tmp]
         except json.JSONDecodeError as e:
-            print(e)
             self.log.error('JSON解包失败，修复中：{}'.format(e))
             self.log.error('JSON包信息：{}'.format(msg))
             if not msg:
-                return msg
+                return []
             msg = msg.replace('}{', '}|{')
             msg = msg.split('|')
-            tmp = json.loads(msg[0])
-            self.log.debug('!RECV REQUEST:{}|FROM:{}|TO:{}'.format(tmp['request'], tmp['from'], tmp['to']))
-            for i in range(0, len(msg) - 1):
-                tmp1 = json.loads(msg[i + 1])
-                self.log.debug('!PASS REQUEST:{}|FROM:{}|TO:{}'.format(tmp1['request'], tmp1['from'], tmp1['to']))
+            tmp = []
+            for each in msg:
+                tmp1=json.loads(each)
+                tmp.append(tmp1)
+                self.log.debug('RECV Multi-REQUEST:{}|FROM:{}|TO:{}'.format(tmp1['request'], tmp1['from'], tmp1['to']))
             return tmp
     
     def recvMsg(self, connection):
