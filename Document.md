@@ -18,6 +18,7 @@
 | randNode |  Hash  |      |
 
 #### Cloud
+
 |  名称  |  类型  |  备注  |
 | :--: | :--: | :--: |
 |  *   | Node |      |
@@ -26,28 +27,29 @@
 
 #### Package
 
-##### connect
+##### connect——连接云
 
 |  名称  |  类型  |  备注  |
 | :--: | :--: | :--: |
 | data | Node |      |
 
-##### acceptConnect
+##### acceptConnect——同意连接云
 
 |  名称  |  类型  |  备注  |
 | :--: | :--: | :--: |
 | data | Node |      |
 
-##### getCloud
+##### getCloud——获取云
+
 无
 
-##### setCloud
+##### setCloud——设置云
+
 |  名称  |  类型   |  备注  |
 | :--: | :---: | :--: |
 | data | Cloud |      |
 
-
-##### setLast
+##### setLast设置上一节点
 
 |  名称  |  类型  |  备注  |
 | :--: | :--: | :--: |
@@ -55,18 +57,20 @@
 
 #### News
 
-##### nodeOnline
-|  名称  |  类型  |  备注  |
-| :--: | :--: | :--: |
-| data | Node |      |
-
-##### nodeOffline
+##### nodeOnline——节点上线
 
 |  名称  |  类型  |  备注  |
 | :--: | :--: | :--: |
 | data | Node |      |
 
-##### setCloud
+##### nodeOffline——节点下线
+
+|  名称  |  类型  |  备注  |
+| :--: | :--: | :--: |
+| data | Node |      |
+
+##### setCloud——设置云
+
 |  名称  |  类型   |  备注  |
 | :--: | :---: | :--: |
 | data | Cloud |      |
