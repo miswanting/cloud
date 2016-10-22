@@ -105,6 +105,8 @@ class Cloud():
         # 自定义过程
     
     def startStar(self):
+        """伴飞卫星"""
+        
         def star():
             def checkCircle():
                 # 检查线程 & 测试通信
@@ -145,6 +147,8 @@ class Cloud():
         self.star.start()
     
     def startServerStar(self):
+        """服务器卫星"""
+        
         def serverStar():
             def subServerStar():
                 # 获取自身
@@ -313,6 +317,8 @@ class Cloud():
         self.serverStar.start()
     
     def startLastStar(self):
+        """上端卫星"""
+        
         def lastStar():
             self.isRunning['LastMission'] = True
             while self.isRunning['LastMission']:
@@ -410,6 +416,8 @@ class Cloud():
         self.lastStar.start()
     
     def startRandStar(self):
+        """随机连接卫星"""
+        
         def randStar():
             pass
         
@@ -417,6 +425,7 @@ class Cloud():
         self.randStar.start()
     
     def generateMyNode(self):
+        """节点信息补全"""
         # 设置Debug模式
         self.debug = True
         self.log.debug('Debug: {}'.format(self.debug))
@@ -427,6 +436,7 @@ class Cloud():
         self.cloud[self.node['hash']] = self.node
     
     def start(self, port):
+        """启动"""
         
         def inputStar():
             pass
@@ -440,6 +450,7 @@ class Cloud():
         self.server['event'].append(newEvent)
     
     def connect(self, ip, port):
+        """连接"""
         newEvent = {}
         newEvent['request'] = 'connect'
         newEvent['data'] = {}
@@ -448,11 +459,13 @@ class Cloud():
         self.last['event'].append(newEvent)
     
     def refreshCloud(self):
+        """刷新云信息"""
         self.cloud[self.node['hash']] = self.node
         newPackage = self.makePackage(['everyone'], 'refreshCloud', self.cloud)
         self.sendNews(newPackage)
     
     def recvJson(self, connection):
+        """接受Json信息（对并列信息健壮）"""
         msg = self.recvMsg(connection)
         try:
             tmp = json.loads(msg)
@@ -467,7 +480,7 @@ class Cloud():
             msg = msg.split('|')
             tmp = []
             for each in msg:
-                tmp1=json.loads(each)
+                tmp1 = json.loads(each)
                 tmp.append(tmp1)
                 self.log.debug('RECV Multi-REQUEST:{}|FROM:{}|TO:{}'.format(tmp1['request'], tmp1['from'], tmp1['to']))
             return tmp
@@ -481,6 +494,7 @@ class Cloud():
         return connection.recv(8192)
     
     def sendNews(self, package):
+        """向上下端发送全局信息"""
         if not self.node['lastNode'] == '':
             self.sendLast(package)
         if not self.node['nextNode'] == '':
