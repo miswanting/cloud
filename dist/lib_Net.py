@@ -160,8 +160,8 @@ class Cloud():
             self.count = {
                 'refreshCloud': 50,
                 'checkCircle': 50,
-                'report': 100,
-                'taskManager': 100
+                'report': 70,
+                'taskManager': 60
             }
             
             self.isRunning['star'] = True
@@ -179,7 +179,7 @@ class Cloud():
                     # self.count['refreshCloud'] = 50
                 if self.count['report'] == 0:
                     report()
-                    self.count['report'] = 50
+                    # self.count['report'] = 50
                 if self.count['taskManager'] == 0:
                     taskManager()
                     # self.count['taskManager'] = 50
@@ -281,9 +281,9 @@ class Cloud():
                                     newPackage = self.makePackage(['you'], 'acceptTest')
                                     self.sendJson(subServer['connection'], newPackage)
                                 elif package['request'] == 'acceptTest':
-                                    pass
+                                    self.isRunning[threading.current_thread().getName()] = False
                                 elif package['request'] == 'ping':
-                                    pass
+                                    self.isRunning[threading.current_thread().getName()] = False
                             elif package['to'][0] == 'everyone': # 广播
                                 hasOne = False
                                 for each in self.packageList:
@@ -337,7 +337,7 @@ class Cloud():
                         self.isRunning['Server'] = True
                         while self.isRunning['Server']: # 持续响应请求
                             try:
-                                self.log.info('正在侦听连接：{}:{}'.format(self.cloud[self.node['hash']]['ip'],
+                                self.log.info('正在等待连接：{}:{}'.format(self.cloud[self.node['hash']]['ip'],
                                                                     self.cloud[self.node['hash']]['port']))
                                 connection, address = self.serverSocket.accept()
                                 self.log.info('捕获连接：{}:{}'.format(address[0], address[1]))
@@ -475,7 +475,7 @@ class Cloud():
                     if event['request'] == 'ping':
                         self.log.info('正在尝试连接：{}:{}'.format(event['data']['ip'], event['data']['port']))
                         try:
-                            # self.randSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            self.randSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                             start = time.clock()
                             self.randSocket.connect((event['data']['ip'], event['data']['port']))
                             end = time.clock()
@@ -485,9 +485,11 @@ class Cloud():
                             newPackage = self.makePackage(['you'], 'ping')
                             self.sendJson(self.randSocket, newPackage)
                             self.log.info('测试成功！ping:{}ms'.format(ping))
-                            # self.randSocket.close()
+                            self.randSocket.close()
                         except OSError as e:
                             print(e)
+                            self.log.error('连接失败：{}'.format(e))
+                            self.log.error('{}:{}'.format(event['data']['ip'], event['data']['port']))
                 except IndexError as e:
                     time.sleep(0.2)
                 self.status['rand'] = ''
@@ -497,6 +499,7 @@ class Cloud():
     
     def generateMyNode(self):
         """节点信息补全"""
+        
         # 设置Debug模式
         self.debug = True
         self.log.debug('Debug: {}'.format(self.debug))
