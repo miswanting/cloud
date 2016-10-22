@@ -37,6 +37,12 @@ class Cloud():
         # 云在我心中
         self.cloud = {}
         
+        # 状态机
+        self.status = {
+            'last': '',
+            'rand': ''
+        }
+        
         # 延迟列表
         self.pingDict = {}
         
@@ -136,10 +142,49 @@ class Cloud():
                 self.log.debug('threads: {}'.format(threading.enumerate()))
                 self.log.debug('||-----------------------------')
             
-            time.sleep(5)
-            report()
-            self.refreshCloud()
-            checkCircle()
+            def taskManager():
+                # pingDict 信息缺失 + 已获得云信息 + 没有 ping = ping
+                if len(self.cloud.items()) > len(self.pingDict.items()):
+                    if not self.status['rand'] == 'ping':
+                        for each in self.cloud.items():
+                            hasFound = False
+                            for every in self.pingDict.items():
+                                if each[0] == every[0]:
+                                    hasFound = True
+                            if not hasFound:
+                                newEvent = {}
+                                newEvent['request'] = 'ping'
+                                newEvent['data'] = self.cloud[each[0]]
+                                self.rand['event'].append(newEvent)
+            
+            self.count = {
+                'refreshCloud': 50,
+                'checkCircle': 50,
+                'report': 100,
+                'taskManager': 100
+            }
+            
+            self.isRunning['star'] = True
+            while self.isRunning['star']:
+                for each in self.count.items():
+                    self.count[each[0]] -= 1
+                    if self.count[each[0]] < -1:
+                        self.count[each[0]] = -1
+                
+                if self.count['checkCircle'] == 0:
+                    checkCircle()
+                    # self.count['checkCircle'] = 50
+                if self.count['refreshCloud'] == 0:
+                    self.refreshCloud()
+                    # self.count['refreshCloud'] = 50
+                if self.count['report'] == 0:
+                    report()
+                    self.count['report'] = 50
+                if self.count['taskManager'] == 0:
+                    taskManager()
+                    # self.count['taskManager'] = 50
+                
+                time.sleep(0.1)
         
         # startStar
         # 启动star线程
