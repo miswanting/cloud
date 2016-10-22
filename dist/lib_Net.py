@@ -16,6 +16,8 @@ class Cloud():
     云
     """
     
+    __version__ = '0.1.0-beta'
+    
     def __init__(self):
         """主流程"""
         self.isRunning = {}
