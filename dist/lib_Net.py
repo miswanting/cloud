@@ -68,10 +68,8 @@ class Cloud():
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         # 设置Logging模块
-        fmt = '{0:^8}'
         logging.basicConfig(filename='Cloud.log', level=logging.DEBUG, filemode='w',
-                            format='%(relativeCreated)d[%(levelname).4s][%(threadName)-.10s]%(message)s',
-                            datefmt='%I:%M:%S')
+                            format='%(relativeCreated)d[%(levelname).4s][%(threadName)-.10s]%(message)s')
         self.log = logging.getLogger(self.node['hash'])
         self.log.setLevel(logging.DEBUG)
         handler = logging.FileHandler(self.node['hash'] + '.log', 'w')
