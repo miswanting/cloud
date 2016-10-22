@@ -280,6 +280,8 @@ class Cloud():
                                     self.sendJson(subServer['connection'], newPackage)
                                 elif package['request'] == 'acceptTest':
                                     pass
+                                elif package['request'] == 'ping':
+                                    pass
                             elif package['to'][0] == 'everyone': # 广播
                                 hasOne = False
                                 for each in self.packageList:
@@ -462,7 +464,31 @@ class Cloud():
         """随机连接卫星"""
         
         def randStar():
-            pass
+            self.isRunning['RandMission'] = True
+            while self.isRunning['RandMission']:
+                try:
+                    # 获取lastStar消息
+                    event = self.rand['event'].popleft()
+                    self.status['rand'] = event['request']
+                    if event['request'] == 'ping':
+                        self.log.info('正在尝试连接：{}:{}'.format(event['data']['ip'], event['data']['port']))
+                        try:
+                            # self.randSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            start = time.clock()
+                            self.randSocket.connect((event['data']['ip'], event['data']['port']))
+                            end = time.clock()
+                            ping = (end - start) * 1000
+                            ping = '{:.3f}'.format(ping)
+                            self.pingDict[event['data']['hash']] = ping
+                            newPackage = self.makePackage(['you'], 'ping')
+                            self.sendJson(self.randSocket, newPackage)
+                            self.log.info('测试成功！ping:{}ms'.format(ping))
+                            # self.randSocket.close()
+                        except OSError as e:
+                            print(e)
+                except IndexError as e:
+                    time.sleep(0.2)
+                self.status['rand'] = ''
         
         self.randStar = threading.Thread(name='RandStar', target=randStar)
         self.randStar.start()
