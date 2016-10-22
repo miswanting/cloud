@@ -15,7 +15,7 @@ class Cloud():
     Advanced Cloud Module with Multi-threading.
     云
     """
-    
+    __author__ = 'miswanting'
     __version__ = '0.1.0-beta'
     
     def __init__(self):
@@ -205,7 +205,7 @@ class Cloud():
                         # self.log.debug(
                         #     'FROM:{}|TO:{}|REQUEST:{}'.format(package['from'], package['to'], package['request']))
                         for package in packages:
-                            if not package:
+                            if package is None:
                                 pass
                             elif package['to'][0] == 'you': # 收件人是我
                                 if package['request'] == 'connect': # 收到connect请求
