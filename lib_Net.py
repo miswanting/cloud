@@ -30,7 +30,7 @@ class InteractiveNode(Node):
         super(InteractiveNode, self).__init__(debug)
 
     def generateHash(self):
-        if self.hash = '':
+        if self.hash == '':
             m = hashlib.md5()
             m.update(str(time.time()).encode("utf-8"))
             m.update(str(random.random()).encode("utf-8"))
