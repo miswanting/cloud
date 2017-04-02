@@ -153,6 +153,7 @@ class Cloud():
         self.inputStar = None
         self.serverStar = None
 
+        # 服务器分发的子线程
         self.subServerStarDict = {}
 
         # 启动各种线程
