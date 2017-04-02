@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import json
 import time
 import random
 import socket
@@ -9,7 +10,7 @@ import threading
 
 from collections import deque
 
-DEFAULT_IP = None
+DEFAULT_IP = 'localhost'
 DEFAULT_PORT = 8765
 
 
@@ -27,13 +28,19 @@ class Server(object):
     isRunning = {}
     HOST = DEFAULT_IP
     PORT = DEFAULT_PORT
-    s = None
     event = deque([])
+    passiveSubs = {}
 
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, api=None):
         super(Server, self).__init__()
         self.debug = debug
+        self.api = api
         self.startServerStar()
+
+    def addEvent(self, event):
+        tmp = {}
+        tmp['request'] = event
+        self.event.append(tmp)
 
     def startServerStar(self):
         def serverStar():
@@ -56,18 +63,52 @@ class Server(object):
         self.isRunning['server'] = True
         while self.isRunning['server']:
             try:
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.s.bind((HOST, PORT))
+                self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.s.bind((self.HOST, self.PORT))
                 self.s.listen(1)
-                self.conn, self.addr = self.s.accept()
+                print('server')
+                conn, addr = self.s.accept()
+                print('server OK')
+                newDict = {
+                    'conn': conn,
+                    'addr': addr
+                }
+                h = getHash()
+                self.passiveSubs[h] = newDict
+                if not self.api == None:
+                    self.api(h)
+                t_tmp = threading.Thread(name=h, target=self.subServer)
+                t_tmp.start()
+
             except OSError as e:
                 print(e)
 
-    def send(self, arg):
-        pass
+    def subServer(self):
+        print(threading.current_thread().name)
+        api = {
+            'request': 'reg'
+        }
+        self.api(api)
 
-    def recv(self):
-        pass
+    def send_json(self, h, data):
+        self.send_str(h, json.dumps(data))
+
+    def recv_json(self, h):
+        return json.loads(self.recv_str(h))
+
+    def send_str(self, h, data):
+        self.send(h, data.encode("utf-8"))
+
+    def recv_str(self, h):
+        return self.recv(h).decode("utf-8")
+
+    def send(self, h, data):
+        if h in self.passiveSubs.keys():
+            self.passiveSubs[h]['conn'].send(data)
+
+    def recv(self, h):
+        if h in self.passiveSubs.keys():
+            return self.passiveSubs[h]['conn'].recv(4096)
 
 
 class Client(object):
@@ -77,11 +118,19 @@ class Client(object):
     isRunning = {}
     HOST = DEFAULT_IP
     PORT = DEFAULT_PORT
+    s = None
+    event = deque([])
 
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, api=None):
         super(Client, self).__init__()
         self.debug = debug
+        self.api = api
         self.startClientStar()
+
+    def addEvent(self, event):
+        tmp = {}
+        tmp['request'] = event
+        self.event.append(tmp)
 
     def startClientStar(self):
         def clientStar():
@@ -90,7 +139,7 @@ class Client(object):
                 try:
                     e = self.event.popleft()
                     if e['request'] == 'connect':
-                        self.startClient()
+                        self.connect()
                     elif e['request'] == 'exit':
                         self.isRunning['client'] = False
                         self.isRunning['self'] = False
@@ -100,20 +149,34 @@ class Client(object):
         self.t_client = threading.Thread(target=clientStar)
         self.t_client.start()
 
-    def startClient(self):
-        self.isRunning['client'] = True
-        while self.isRunning['client']:
-            try:
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.s.connect((HOST, PORT))
-            except OSError as e:
-                print(e)
+    def connect(self):
+        try:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print('client')
+            self.s.connect((self.HOST, self.PORT))
+            print('client OK')
+            print(self.recv_str())
 
-    def send(self, arg):
-        pass
+        except OSError as e:
+            print(e)
+
+    def send_json(self, data):
+        self.send_str(json.dumps(data))
+
+    def recv_json(self):
+        return json.loads(self.recv_str())
+
+    def send_str(self,  data):
+        self.send(data.encode("utf-8"))
+
+    def recv_str(self):
+        return self.recv().decode("utf-8")
+
+    def send(self, data):
+        self.s.send(data)
 
     def recv(self):
-        pass
+        return self.s.recv(4096)
 
 
 class Cloud(object):
@@ -190,6 +253,15 @@ class Cloud(object):
         self.star['serv'] = None
         self.star['input'] = None
 
+        self.last = Client(api=self.api)
+        self.rand = Client(api=self.api)
+        self.server = Server(api=self.api)
+
+        self.server.addEvent('start')
+
+    def api(self, arg):
+        print(arg)
+
 
 class Protocol(object):
     """docstring for Protocol."""
@@ -199,5 +271,12 @@ class Protocol(object):
         self.debug = debug
 
 if __name__ == '__main__':
-    a = Server(True)
-    a.startServerStar
+    def api(arg):
+        print(arg)
+    a = Server(True, api=api)
+    a.addEvent('start')
+    time.sleep(1)
+    b = Client(True, api=api)
+    b.addEvent('connect')
+    time.sleep(1)
+    b.send_str('123')
