@@ -156,10 +156,11 @@ class Cloud():
         self.subServerStarDict = {}
 
         # 启动各种线程
-        self.startStar()
-        self.startServerStar()
-        self.startLastStar()
-        self.startRandStar()
+        # BUG: 在v0.1.0-beta中设为实例化之后不启动线程，而是等待被设置。
+        # self.startStar()
+        # self.startServerStar()
+        # self.startLastStar()
+        # self.startRandStar()
 
         # 初始化
         self.generateMyNode()
