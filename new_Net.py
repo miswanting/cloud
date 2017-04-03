@@ -217,6 +217,10 @@ class Cloud(object):
         # self.server.addEvent('start')
         # time.sleep(1)
         # self.last.addEvent('connect')
+
+    def startServer(self, host='0.0.0.0', port=8765):
+        self.server.HOST = host
+        self.server.POST = port
         self.server.addEvent('start')
 
     def api(self, arg):
