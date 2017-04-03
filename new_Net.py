@@ -83,7 +83,18 @@ class Server(object):
 
     def subServer(self):
         print(threading.current_thread().name)
+
+        def iSendJson(data):
+            self.send_json(threading.current_thread().name, data)
+
+        def iRecvJson():
+            return self.recv_json(threading.current_thread().name)
+        arg = {
+            'request': 'accepted',
+            'func_send_json': iSendJson,
+            'func_recv_json': iRecvJson
         }
+        self.api(arg)
 
     def send_json(self, h, data):
         self.send_str(h, json.dumps(data))
