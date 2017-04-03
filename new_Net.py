@@ -212,6 +212,11 @@ class Cloud(object):
         self.rand = Client(api=self.api)
         self.server = Server(api=self.api)
 
+        self.node['name'] = getHash()
+
+        # self.server.addEvent('start')
+        # time.sleep(1)
+        # self.last.addEvent('connect')
         self.server.addEvent('start')
 
     def api(self, arg):
