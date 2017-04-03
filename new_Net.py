@@ -186,72 +186,11 @@ class Cloud(object):
 
     isRunning = {}
 
-    # 代表自己的节点
     node = {}
-
-    # 云的本地副本
-    cloud = {}
-
-    # 状态机
-    status = {
-        'last': '',
-        'rand': ''
-    }
-
-    # 延迟列表
-    pingDict = {}
-
-    # 消息队列
-    event = {}
-
-    socket = {}
-
-    star = {}
-
-    passiveStar = {}
 
     def __init__(self, debug=False):
         super(Cloud, self).__init__()
         self.debug = debug
-        self.isRunning['self'] = True
-        self.isRunning['last'] = False
-        self.isRunning['rand'] = False
-        self.isRunning['serv'] = False
-
-        # 消息队列
-        self.event['last'] = deque([])
-        self.event['rand'] = deque([])
-        self.event['serv'] = deque([])
-
-        # 生成自身Hash
-        self.node['hash'] = getHash()
-        self.node['last'] = ''
-        self.node['rand'] = ''
-        self.node['next'] = ''
-
-        # 套接字
-        self.socket['last'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket['rand'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket['next'] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        # 设置Logging
-        logging.basicConfig(filename='Cloud.log', level=logging.DEBUG, filemode='w',
-                            format='%(relativeCreated)d[%(levelname).4s][%(threadName)-.4s]%(message)s')
-        self.log = logging.getLogger(self.node['hash'][:4])
-        self.log.setLevel(logging.DEBUG)
-        handler = logging.FileHandler(self.node['hash'][:4] + '.log', 'w')
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(relativeCreated)d[%(levelname).4s][%(threadName)-.4s]%(message)s')
-        handler.setFormatter(formatter)
-        self.log.addHandler(handler)
-        self.log.info('Hash: {}'.format(self.node['hash']))
-
-        self.star['self'] = None
-        self.star['last'] = None
-        self.star['rand'] = None
-        self.star['serv'] = None
-        self.star['input'] = None
 
         self.last = Client(api=self.api)
         self.rand = Client(api=self.api)
