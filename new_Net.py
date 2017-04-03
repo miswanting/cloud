@@ -229,6 +229,14 @@ class Cloud(object):
         self.last.addEvent('connect')
 
     def api(self, arg):
+        if arg['request'] == 'accepted':
+            p = Protocol()
+            p.node = self.node
+            p.accepted(arg['func_send_json'], arg['func_recv_json'])
+        elif arg['request'] == 'connected':
+            p = Protocol()
+            p.node = self.node
+            p.connected(arg['func_send_json'], arg['func_recv_json'])
 
 
 class Protocol(object):
@@ -241,5 +249,28 @@ class Protocol(object):
     def __init__(self, debug=False):
         super(Protocol, self).__init__()
         self.debug = debug
+
+    def accepted(self, func_send_json, func_recv_json):
+        verify = func_recv_json()
+        print('S:', verify)
+        pas = {
+            'request': 'pass'
+        }
+        func_send_json(pas)
+        join = func_recv_json()
+        print('S:', join)
+
+    def connected(self, func_send_json, func_recv_json):
+        verify = {
+            'request': 'verify',
+            'name': self.node['name']
+        }
+        func_send_json(verify)
+        pas = func_recv_json()
+        print('C:', pas)
+        join = {
+            'request': 'join'
+        }
+        func_send_json(join)
 
 if __name__ == '__main__':
