@@ -75,8 +75,6 @@ class Server(object):
                 }
                 h = getHash()
                 self.passiveSubs[h] = newDict
-                if not self.api == None:
-                    self.api(h)
                 t_tmp = threading.Thread(name=h, target=self.subServer)
                 t_tmp.start()
 
@@ -85,10 +83,7 @@ class Server(object):
 
     def subServer(self):
         print(threading.current_thread().name)
-        api = {
-            'request': 'reg'
         }
-        self.api(api)
 
     def send_json(self, h, data):
         self.send_str(h, json.dumps(data))
@@ -118,7 +113,6 @@ class Client(object):
     isRunning = {}
     HOST = DEFAULT_IP
     PORT = DEFAULT_PORT
-    s = None
     event = deque([])
 
     def __init__(self, debug=False, api=None):
@@ -155,7 +149,6 @@ class Client(object):
             print('client')
             self.s.connect((self.HOST, self.PORT))
             print('client OK')
-            print(self.recv_str())
 
         except OSError as e:
             print(e)
@@ -199,7 +192,6 @@ class Cloud(object):
         self.server.addEvent('start')
 
     def api(self, arg):
-        print(arg)
 
 
 class Protocol(object):
