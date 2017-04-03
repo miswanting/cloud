@@ -202,12 +202,3 @@ class Protocol(object):
         self.debug = debug
 
 if __name__ == '__main__':
-    def api(arg):
-        print(arg)
-    a = Server(True, api=api)
-    a.addEvent('start')
-    time.sleep(1)
-    b = Client(True, api=api)
-    b.addEvent('connect')
-    time.sleep(1)
-    b.send_str('123')
