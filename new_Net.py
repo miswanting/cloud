@@ -233,6 +233,10 @@ class Cloud(object):
 
 class Protocol(object):
     """docstring for Protocol."""
+    __author__ = 'miswanting'
+    __version__ = '0.1.0-beta'
+
+    node = {}
 
     def __init__(self, debug=False):
         super(Protocol, self).__init__()
