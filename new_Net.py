@@ -223,6 +223,11 @@ class Cloud(object):
         self.server.POST = port
         self.server.addEvent('start')
 
+    def connect(self, host, port=8765):
+        self.last.HOST = host
+        self.last.POST = port
+        self.last.addEvent('connect')
+
     def api(self, arg):
 
 
