@@ -103,10 +103,13 @@ class Server(object):
         return json.loads(self.recv_str(h))
 
     def send_str(self, h, data):
+        print('send:', data)
         self.send(h, data.encode("utf-8"))
 
     def recv_str(self, h):
-        return self.recv(h).decode("utf-8")
+        tmp = self.recv(h).decode("utf-8")
+        print('recv:', tmp)
+        return tmp
 
     def send(self, h, data):
         if h in self.passiveSubs.keys():
@@ -171,10 +174,13 @@ class Client(object):
         return json.loads(self.recv_str())
 
     def send_str(self,  data):
+        print('send:', data)
         self.send(data.encode("utf-8"))
 
     def recv_str(self):
-        return self.recv().decode("utf-8")
+        tmp = self.recv().decode("utf-8")
+        print('recv:', tmp)
+        return tmp
 
     def send(self, data):
         self.s.send(data)
