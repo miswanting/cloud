@@ -274,3 +274,7 @@ class Protocol(object):
         func_send_json(join)
 
 if __name__ == '__main__':
+    a = Cloud(True)
+    a.startServer()
+    time.sleep(0.5)
+    a.connect('localhost')
