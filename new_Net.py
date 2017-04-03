@@ -163,6 +163,12 @@ class Client(object):
             print('client')
             self.s.connect((self.HOST, self.PORT))
             print('client OK')
+            arg = {
+                'request': 'connected',
+                'func_send_json': self.send_json,
+                'func_recv_json': self.recv_json
+            }
+            self.api(arg)
 
         except OSError as e:
             print(e)
